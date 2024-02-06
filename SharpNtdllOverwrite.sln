@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNtdllOverwrite", "SharpNtdllOverwrite\SharpNtdllOverwrite.csproj", "{891B3B6B-04B3-49EA-93CD-CA3CC48D560D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{891B3B6B-04B3-49EA-93CD-CA3CC48D560D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{891B3B6B-04B3-49EA-93CD-CA3CC48D560D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{891B3B6B-04B3-49EA-93CD-CA3CC48D560D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{891B3B6B-04B3-49EA-93CD-CA3CC48D560D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE801030-9E22-4130-8BDF-39F3E3EFEE26}
+	EndGlobalSection
+EndGlobal
