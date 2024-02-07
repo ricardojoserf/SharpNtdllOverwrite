@@ -4,12 +4,13 @@ using System.Runtime.InteropServices;
 using static SharpNtdllOverwrite.Native;
 using static SharpNtdllOverwrite.FromDisk;
 using static SharpNtdllOverwrite.FromKnownDlls;
+using static SharpNtdllOverwrite.FromDebugProc;
 
 namespace SharpNtdllOverwrite
 {
     internal class Program
     {
-        unsafe static IntPtr auxGetModuleHandle(String dll_name)
+        public unsafe static IntPtr auxGetModuleHandle(String dll_name)
         {
             IntPtr hProcess = Process.GetCurrentProcess().Handle;
             uint temp = 0;
@@ -60,7 +61,7 @@ namespace SharpNtdllOverwrite
         }
 
 
-        static int[] GetTextSectionInfo(IntPtr ntdl_address)
+        public static int[] GetTextSectionInfo(IntPtr ntdl_address)
         {
             IntPtr hProcess = Process.GetCurrentProcess().Handle;
 
@@ -157,18 +158,26 @@ namespace SharpNtdllOverwrite
 
             int offset_mappeddll = 4096;
             IntPtr unhookedNtdllTxt = unhookedNtdllHandle + offset_mappeddll;
-            Console.WriteLine("[+] Mapped Ntdll Text Section [Disk]: \t\t0x" + unhookedNtdllTxt.ToString("X"));
+            Console.WriteLine("[+] Mapped Ntdll .Text Section [Disk]: \t\t0x" + unhookedNtdllTxt.ToString("X"));
             
 
             // Clean DLL - KNOWNDLLS
             IntPtr unhookedNtdllHandle___2 = MapNtdllFromKnownDlls();
             Console.WriteLine("[+] Mapped Ntdll Handle [KnownDlls]: \t\t0x" + unhookedNtdllHandle___2.ToString("X"));
 
-            int offset_mappeddll___2 = 4096;
-            IntPtr unhookedNtdllTxt___2 = unhookedNtdllHandle___2 + offset_mappeddll___2;
-            Console.WriteLine("[+] Mapped Ntdll Text Section [KnownDlls]: \t0x" + unhookedNtdllTxt___2.ToString("X"));
-
+            IntPtr unhookedNtdllTxt___2 = unhookedNtdllHandle___2 + offset_mappeddll;
+            Console.WriteLine("[+] Mapped Ntdll .Text Section [KnownDlls]: \t0x" + unhookedNtdllTxt___2.ToString("X"));
             
+
+            // Clean DLL - Debug Process
+            string process_path = "c:\\windows\\system32\\calc.exe";
+            IntPtr unhookedNtdllHandle___3 = MapNtdllFromDebugProc(process_path);
+            Console.WriteLine("[+] Mapped Ntdll Handle [DebugProc]: \t\t0x" + unhookedNtdllHandle___3.ToString("X"));
+
+            IntPtr unhookedNtdllTxt___3 = unhookedNtdllHandle___3 + offset_mappeddll;
+            Console.WriteLine("[+] Mapped Ntdll .Text Section [DebugProc]: \t0x" + unhookedNtdllTxt___3.ToString("X"));
+
+
             // Local DLL
             IntPtr localNtdllHandle = auxGetModuleHandle("ntdll.dll");
             Console.WriteLine("[+] Local Ntdll Handle: \t\t\t0x" + localNtdllHandle.ToString("X"));
@@ -182,6 +191,8 @@ namespace SharpNtdllOverwrite
 
             // Replace DLL
             ReplaceNtdllTxtSection(unhookedNtdllTxt, localNtdllTxt, localNtdllTxtSize);
+
+            Console.ReadKey();
         }
     }
 }

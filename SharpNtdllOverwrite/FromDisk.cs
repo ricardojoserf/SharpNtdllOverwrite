@@ -5,12 +5,9 @@ namespace SharpNtdllOverwrite
 {
     internal class FromDisk
     {
-        // Map ntdl.dll and return view address
+        // Map ntdl.dll from the file in disk and return view address
         public static IntPtr MapNtdllFromDisk(string ntdll_path)
         {
-            // string ntdll_path = "C:\\Windows\\System32\\ntdll.dll";
-            // string ntdll_path = "C:\\Users\\ricardo\\Desktop\\ntdll_poc.dll";
-
             IntPtr hFile = CreateFileA(ntdll_path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
             // CreateFileA

@@ -5,6 +5,7 @@ namespace SharpNtdllOverwrite
 {
     internal class FromKnownDlls
     {
+        // Map ntdl.dll from the KnownDlls folder and return view address
         public static IntPtr MapNtdllFromKnownDlls() {
             // Initialize OBJECT_ATTRIBUTES struct
             string dll_name = "\\KnownDlls\\ntdll.dll";

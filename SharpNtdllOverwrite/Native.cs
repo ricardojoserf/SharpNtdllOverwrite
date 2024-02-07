@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using static SharpNtdllOverwrite.FromDebugProc;
 
 namespace SharpNtdllOverwrite
 {
@@ -62,12 +63,13 @@ namespace SharpNtdllOverwrite
         );
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(
+        public static extern uint ReadProcessMemory(
             IntPtr hProcess,
             IntPtr lpBaseAddress,
             [Out] byte[] lpBuffer,
             int dwSize,
-            out IntPtr lpNumberOfBytesRead
+            // out IntPtr lpNumberOfBytesRead
+            out uint lpNumberOfBytesRead
         );
 
         [DllImport("ntdll.dll", SetLastError = true)]
@@ -97,6 +99,28 @@ namespace SharpNtdllOverwrite
         }
 
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool CreateProcess
+        (
+            string lpApplicationName,
+            string lpCommandLine,
+            IntPtr lpProcessAttributes,
+            IntPtr lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            ref STARTUPINFO lpStartupInfo,
+            out PROCESS_INFORMATION lpProcessInformation
+        );
+
+        [DllImport("kernel32.dll")]
+        public static extern bool DebugActiveProcessStop(int dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
+
         ///////////////////// STRUCTS ///////////////////// 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct UNICODE_STRING
@@ -117,7 +141,10 @@ namespace SharpNtdllOverwrite
             public IntPtr SecurityDescriptor;
             public IntPtr SecurityQualityOfService;
         }
-        
+
+        [StructLayout(LayoutKind.Sequential)] public struct STARTUPINFO { public int cb; public IntPtr lpReserved; public IntPtr lpDesktop; public IntPtr lpTitle; public int dwX; public int dwY; public int dwXSize; public int dwYSize; public int dwXCountChars; public int dwYCountChars; public int dwFillAttribute; public int dwFlags; public short wShowWindow; public short cbReserved2; public IntPtr lpReserved2; public IntPtr hStdInput; public IntPtr hStdOutput; public IntPtr hStdError; }
+        [StructLayout(LayoutKind.Sequential)] public struct PROCESS_INFORMATION { public IntPtr hProcess; public IntPtr hThread; public int dwProcessId; public int dwThreadId; }
+
 
         /////////////////////  ENUMS  /////////////////////
         public enum NTSTATUS : uint
@@ -147,5 +174,6 @@ namespace SharpNtdllOverwrite
         public const uint PAGE_EXECUTE_WRITECOPY = 0x80;
         public const uint OBJ_CASE_INSENSITIVE = 0x00000040;
         public const int SECTION_MAP_READ = 0x0004; // https://www.codeproject.com/Tips/79069/How-to-use-a-memory-mapped-file-with-Csharp-in-Win
+        public const uint DEBUG_PROCESS = 0x00000001;
     }
 }
