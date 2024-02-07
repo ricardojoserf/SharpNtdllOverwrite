@@ -7,7 +7,8 @@ namespace SharpNtdllOverwrite
 {
     internal class FromDebugProc
     {
-        public unsafe static IntPtr MapNtdllFromDebugProc(string process_path)
+        // Create debug process, map its ntdl.dll .text section and copy it to a new buffer, return the buffer address
+        public unsafe static IntPtr GetNtdllFromDebugProc(string process_path)
         {
             // CreateProcess in DEBUG mode
             STARTUPINFO si = new STARTUPINFO();
@@ -18,23 +19,25 @@ namespace SharpNtdllOverwrite
                 Console.WriteLine("[-] Error calling CreateProcess");
                 Environment.Exit(0);
             }
-            // Console.WriteLine("[+] Process created with PID:\t\t\t" + pi.dwProcessId);
 
-            // Ntdll address and size from local process
+            // Ntdll .Text Section Address and Size from local process
             IntPtr localNtdllHandle = auxGetModuleHandle("ntdll.dll");
             int[] result = GetTextSectionInfo(localNtdllHandle);
+            int localNtdllTxtBase = result[0];
             int localNtdllTxtSize = result[1];
+            IntPtr localNtdllTxt = localNtdllHandle + localNtdllTxtBase;
 
             // ReadProcessMemory to copy the bytes from ntdll.dll in the suspended process into a new buffer (ntdllBuffer)
+            // debugged_process ntdll_handle = local ntdll_handle --> debugged_process .text section ntdll_handle = local .text section ntdll_handle
             byte[] ntdllBuffer = new byte[localNtdllTxtSize];
-            // IntPtr debugged_process_ntdll_handle = localNtdllHandle;
-            uint readprocmem_res = ReadProcessMemory(pi.hProcess, localNtdllHandle, ntdllBuffer, ntdllBuffer.Length, out _);
+            uint readprocmem_res = ReadProcessMemory(pi.hProcess, localNtdllTxt, ntdllBuffer, ntdllBuffer.Length, out _);
             if (readprocmem_res == 0)
             {
                 Console.WriteLine("[-] Error calling ReadProcessMemory");
                 Environment.Exit(0);
             }
 
+            // Get pointer to the buffer containing ntdll.dll
             IntPtr pNtdllBuffer = IntPtr.Zero;
             fixed (byte* p = ntdllBuffer)
             {

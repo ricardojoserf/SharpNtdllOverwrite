@@ -24,7 +24,7 @@ namespace SharpNtdllOverwrite
             fixed (byte* p = pbi_byte_array)
             {
                 pbi_addr = (IntPtr)p;
-                NTSTATUS res = NtQueryInformationProcess(hProcess, 0x0, pbi_addr, (uint)(IntPtr.Size * 6), ref temp);
+                NtQueryInformationProcess(hProcess, 0x0, pbi_addr, (uint)(IntPtr.Size * 6), ref temp);
             }
 
             // Get PEB Base Address
@@ -135,7 +135,6 @@ namespace SharpNtdllOverwrite
             // Copy from one address to the other
             unsafe
             {
-                Console.WriteLine("[+] Copying " + localNtdllTxtSize + " bytes from 0x" + unhookedNtdllTxt.ToString("X") + " to 0x" + localNtdllTxt.ToString("X"));
                 Buffer.MemoryCopy((void*)unhookedNtdllTxt, (void*)localNtdllTxt, localNtdllTxtSize, localNtdllTxtSize);
             }
 
@@ -143,7 +142,7 @@ namespace SharpNtdllOverwrite
             bool vp2_res = VirtualProtect(localNtdllTxt, (uint)localNtdllTxtSize, dwOldProtection, out dwOldProtection);
             if (!vp2_res)
             {
-                Console.WriteLine("[-] Error calling VirtualProtect (PAGE_EXECUTE_READ)");
+                Console.WriteLine("[-] Error calling VirtualProtect (dwOldProtection)");
                 Environment.Exit(0);
             }
         }
@@ -151,48 +150,67 @@ namespace SharpNtdllOverwrite
 
         static void Main(string[] args)
         {
-            // Clean DLL - DISK
-            string ntdll_path = "C:\\Windows\\System32\\ntdll.dll";
-            IntPtr unhookedNtdllHandle = MapNtdllFromDisk(ntdll_path);
-            Console.WriteLine("[+] Mapped Ntdll Handle [Disk]: \t\t0x" + unhookedNtdllHandle.ToString("X"));
+            string option = "default";
+            if (args.Length >= 1)
+            {
+                option = args[0];
+            }
 
-            int offset_mappeddll = 4096;
-            IntPtr unhookedNtdllTxt = unhookedNtdllHandle + offset_mappeddll;
-            Console.WriteLine("[+] Mapped Ntdll .Text Section [Disk]: \t\t0x" + unhookedNtdllTxt.ToString("X"));
-            
+            // Clean DLL
+            IntPtr unhookedNtdllTxt = IntPtr.Zero;
+            switch (option)
+            {
+                // From file in disk
+                case "disk":
+                    string ntdll_path = "C:\\Windows\\System32\\ntdll.dll";
+                    if (args.Length >= 2)
+                    {
+                        ntdll_path = args[1];
+                    }
+                    IntPtr unhookedNtdllHandle = MapNtdllFromDisk(ntdll_path);
+                    Console.WriteLine("[+] Mapped Ntdll Handle [Disk]: \t\t0x" + unhookedNtdllHandle.ToString("X"));
+                    unhookedNtdllTxt = unhookedNtdllHandle + offset_mappeddll;
+                    Console.WriteLine("[+] Mapped Ntdll .Text Section [Disk]: \t\t0x" + unhookedNtdllTxt.ToString("X"));
+                    break;
 
-            // Clean DLL - KNOWNDLLS
-            IntPtr unhookedNtdllHandle___2 = MapNtdllFromKnownDlls();
-            Console.WriteLine("[+] Mapped Ntdll Handle [KnownDlls]: \t\t0x" + unhookedNtdllHandle___2.ToString("X"));
+                // From KnownDlls folder
+                case "knowndlls":
+                    unhookedNtdllHandle = MapNtdllFromKnownDlls();
+                    Console.WriteLine("[+] Mapped Ntdll Handle [KnownDlls]: \t\t0x" + unhookedNtdllHandle.ToString("X"));
+                    unhookedNtdllTxt = unhookedNtdllHandle + offset_mappeddll;
+                    Console.WriteLine("[+] Mapped Ntdll .Text Section [KnownDlls]: \t0x" + unhookedNtdllTxt.ToString("X"));
+                    break;
 
-            IntPtr unhookedNtdllTxt___2 = unhookedNtdllHandle___2 + offset_mappeddll;
-            Console.WriteLine("[+] Mapped Ntdll .Text Section [KnownDlls]: \t0x" + unhookedNtdllTxt___2.ToString("X"));
-            
+                // From a process created in DEBUG mode
+                case "debugproc":
+                    string process_path = "c:\\windows\\system32\\calc.exe";
+                    if (args.Length >= 2)
+                    {
+                        process_path = args[1];
+                    }
+                    unhookedNtdllTxt = GetNtdllFromDebugProc(process_path);
+                    Console.WriteLine("[+] Mapped Ntdll .Text Section [DebugProc]: \t0x" + unhookedNtdllTxt.ToString("X"));
+                    break;
 
-            // Clean DLL - Debug Process
-            string process_path = "c:\\windows\\system32\\calc.exe";
-            IntPtr unhookedNtdllHandle___3 = MapNtdllFromDebugProc(process_path);
-            Console.WriteLine("[+] Mapped Ntdll Handle [DebugProc]: \t\t0x" + unhookedNtdllHandle___3.ToString("X"));
-
-            IntPtr unhookedNtdllTxt___3 = unhookedNtdllHandle___3 + offset_mappeddll;
-            Console.WriteLine("[+] Mapped Ntdll .Text Section [DebugProc]: \t0x" + unhookedNtdllTxt___3.ToString("X"));
-
+                // Default: Show usage message
+                default:
+                    Console.WriteLine("[-] One input parameter is necessary: \"disk\", \"knowndlls\" or \"debugproc\".\n[-] Options \"disk\" and \"debugproc\" accept a second parameter or use their default value.\n\n[*] From disk:\n[*] SharpNtdllOverwrite.exe disk [ c:\\windows\\system32\\ntdll.dll ]\n[*] From KnownDlls folder:\n[*] SharpNtdllOverwrite.exe knowndlls\n[*] From a process created in DEBUG mode:\n[*] nSharpNtdllOverwrite.exe debugproc [ c:\\windows\\system32\\calc.exe ]");
+                    Environment.Exit(0);
+                    break;
+            }
 
             // Local DLL
             IntPtr localNtdllHandle = auxGetModuleHandle("ntdll.dll");
             Console.WriteLine("[+] Local Ntdll Handle: \t\t\t0x" + localNtdllHandle.ToString("X"));
-
             int[] result = GetTextSectionInfo(localNtdllHandle);
             int localNtdllTxtBase = result[0];
             int localNtdllTxtSize = result[1];
             IntPtr localNtdllTxt = localNtdllHandle + localNtdllTxtBase;
             Console.WriteLine("[+] Local Ntdll Text Section: \t\t\t0x" + localNtdllTxt.ToString("X"));
 
-
             // Replace DLL
+            Console.WriteLine("[+] Copying " + localNtdllTxtSize + " bytes from 0x" + unhookedNtdllTxt.ToString("X") + " to 0x" + localNtdllTxt.ToString("X"));
             ReplaceNtdllTxtSection(unhookedNtdllTxt, localNtdllTxt, localNtdllTxtSize);
-
-            Console.ReadKey();
         }
     }
 }
