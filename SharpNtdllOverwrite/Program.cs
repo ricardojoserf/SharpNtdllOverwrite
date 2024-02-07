@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
 using static SharpNtdllOverwrite.Native;
 using static SharpNtdllOverwrite.FromDisk;
 using static SharpNtdllOverwrite.FromKnownDlls;
 
 namespace SharpNtdllOverwrite
 {
-    internal class SharpNtdllOverwriteProgram
+    internal class Program
     {
         unsafe static IntPtr auxGetModuleHandle(String dll_name)
         {
@@ -121,15 +120,6 @@ namespace SharpNtdllOverwrite
         }
 
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool VirtualProtect(
-            IntPtr lpAddress,
-            uint dwSize,
-            uint flNewProtect,
-            out uint lpflOldProtect
-        );
-
-
         static void ReplaceNtdllTxtSection(IntPtr unhookedNtdllTxt, IntPtr localNtdllTxt, int localNtdllTxtSize)
         {
             // VirtualProtect to PAGE_EXECUTE_WRITECOPY
@@ -163,7 +153,7 @@ namespace SharpNtdllOverwrite
             // Clean DLL - DISK
             string ntdll_path = "C:\\Windows\\System32\\ntdll.dll";
             IntPtr unhookedNtdllHandle = MapNtdllFromDisk(ntdll_path);
-            Console.WriteLine("[+] Mapped Ntdll Handle: \t\t\t0x" + unhookedNtdllHandle.ToString("X"));
+            Console.WriteLine("[+] Mapped Ntdll Handle [Disk]: \t\t0x" + unhookedNtdllHandle.ToString("X"));
 
             int offset_mappeddll = 4096;
             IntPtr unhookedNtdllTxt = unhookedNtdllHandle + offset_mappeddll;
@@ -172,6 +162,8 @@ namespace SharpNtdllOverwrite
 
             // Clean DLL - KNOWNDLLS
             IntPtr unhookedNtdllHandle___2 = MapNtdllFromKnownDlls();
+            Console.WriteLine("[+] Mapped Ntdll Handle [KnownDlls]: \t\t0x" + unhookedNtdllHandle___2.ToString("X"));
+
             int offset_mappeddll___2 = 4096;
             IntPtr unhookedNtdllTxt___2 = unhookedNtdllHandle___2 + offset_mappeddll___2;
             Console.WriteLine("[+] Mapped Ntdll Text Section [KnownDlls]: \t0x" + unhookedNtdllTxt___2.ToString("X"));
@@ -190,9 +182,6 @@ namespace SharpNtdllOverwrite
 
             // Replace DLL
             ReplaceNtdllTxtSection(unhookedNtdllTxt, localNtdllTxt, localNtdllTxtSize);
-
-            Console.ReadKey();
-
         }
     }
 }
