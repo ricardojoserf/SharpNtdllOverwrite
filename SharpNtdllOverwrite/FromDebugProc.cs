@@ -21,7 +21,7 @@ namespace SharpNtdllOverwrite
             }
 
             // Ntdll .Text Section Address and Size from local process
-            IntPtr localNtdllHandle = auxGetModuleHandle("ntdll.dll");
+            IntPtr localNtdllHandle = CustomGetModuleHandle("ntdll.dll");
             int[] result = GetTextSectionInfo(localNtdllHandle);
             int localNtdllTxtBase = result[0];
             int localNtdllTxtSize = result[1];

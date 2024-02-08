@@ -9,6 +9,11 @@ namespace SharpNtdllOverwrite
         public static IntPtr MapNtdllFromKnownDlls() {
             // Initialize OBJECT_ATTRIBUTES struct
             string dll_name = "\\KnownDlls\\ntdll.dll";
+            // If 32-bit process the path changes
+            if (IntPtr.Size == 4)
+            {
+                dll_name = "\\KnownDlls32\\ntdll.dll";
+            }
             OBJECT_ATTRIBUTES object_attribute = InitializeObjectAttributes(dll_name, OBJ_CASE_INSENSITIVE);
 
             // NtOpenSection

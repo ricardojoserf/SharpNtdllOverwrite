@@ -58,7 +58,7 @@ namespace SharpNtdllOverwrite
             int processInformationClass,
             IntPtr pbi,
             uint processInformationLength,
-            ref uint returnLength
+            out uint returnLength
         );
 
         [DllImport("kernel32.dll", SetLastError = true)]
