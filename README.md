@@ -1,6 +1,6 @@
 # SharpNtdllOverwrite
 
-Overwrite ntdll.dll's .TEXT section using a clean version of the DLL. 
+Overwrite ntdll.dll's ".text" section using a clean version of the DLL. 
 
 It can help to evade security measures that install API hooks such as EDRs. 
 
