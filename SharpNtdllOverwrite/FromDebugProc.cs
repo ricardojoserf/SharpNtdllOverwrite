@@ -1,7 +1,6 @@
 ﻿using System;
-using static SharpNtdllOverwrite.Program;
-using static SharpNtdllOverwrite.Native;
-
+using static SharpNtdllOverwrite.LocalProc;
+using static SharpNtdllOverwrite.Win32;
 
 namespace SharpNtdllOverwrite
 {
