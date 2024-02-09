@@ -1,8 +1,15 @@
 # SharpNtdllOverwrite
 
-Overwrite ntdll.dll's .TEXT section with a clean version of the DLL, helping to evade security measures that install API hooks. 
+Overwrite ntdll.dll's .TEXT section using a clean version of the DLL. 
 
-The unhooked version of the DLL can be obtained from a file on disk, the KnownDlls folder, a created debug process or a URL.
+It can help to evade security measures that install API hooks such as EDRs. 
+
+The unhooked version of the DLL can be obtained from:
+
+- A DLL file already on disk - For example "C:\Windows\System32\ntdll.dll".
+- The KnownDlls folder - "\KnownDlls\ntdll.dll" for 64-bit processes and "\KnownDlls32\ntdll.dll" for 32-bit processes.
+- A process created in debug mode - Processes created in suspended or debug mode have a clean ntdll.dll.
+- A URL - Similar to the first option, but the file is downloaded from a web server.
 
 ---------------------------------
 
