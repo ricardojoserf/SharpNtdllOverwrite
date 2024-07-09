@@ -59,3 +59,8 @@ SharpNtdllOverwrite.exe download [URL]
 ### Sources
 
 - [Maldev Academy](https://maldevacademy.com/) explains this technique in one of their lessons using code written in C/C++.
+
+
+### Other links
+
+- Python implementation: [pyNtdllOverwrite](https://github.com/ricardojoserf/pyNtdllOverwrite)
